@@ -1,0 +1,59 @@
+
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "username": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "availableBalance": { "type": "number" },
+        "investedBalance": { "type": "number" },
+        "referralCode": { "type": "string" },
+        "referredBy": { "type": "string" },
+        "referralCount": { "type": "number" },
+        "totalEarnings": { "type": "number" },
+        "hasDeposited": { "type": "boolean" },
+        "welcomeBonusClaimed": { "type": "boolean" },
+        "isSuspended": { "type": "boolean" }
+      }
+    },
+    "Plan": {
+      "title": "Plan",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "dailyIncome": { "type": "number" },
+        "time": { "type": "number" },
+        "totalIncome": { "type": "number" },
+        "cashback": { "type": "number" },
+        "isActive": { "type": "boolean" }
+      }
+    },
+    "Investment": {
+      "title": "Investment",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "planId": { "type": "string" },
+        "price": { "type": "number" },
+        "dailyIncome": { "type": "number" },
+        "lastCollectionAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string" }
+      }
+    }
+  },
+  "auth": {
+    "providers": ["password"]
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "User", "description": "User profiles" },
+    "/plans/{planId}": { "schema": "Plan", "description": "Investment products" },
+    "/investments/{investmentId}": { "schema": "Investment", "description": "User product purchases" },
+    "/transactions/{transactionId}": { "schema": "Transaction", "description": "Financial records" },
+    "/settings/global": { "schema": "Setting", "description": "Global config" }
+  }
+}

@@ -1,0 +1,82 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Helper Functions ---
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Helper to check if the CURRENT user has the admin role.
+    // BREAK RECURSION: Allow the user to read their own document via 'isOwner' first.
+    function isAdmin() {
+      return isSignedIn() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // --- Path Rules ---
+
+    match /settings/{settingId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    match /plans/{planId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    match /admin_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /users/{userId} {
+      // BASE CASE: Owners can ALWAYS read their own profile.
+      // This is the recursion breaker for isAdmin().
+      allow get: if isOwner(userId);
+      
+      // Admins can list and read any user.
+      allow list, get: if isAdmin();
+      
+      allow create: if isOwner(userId);
+      
+      // Allow profile updates and specific field increments (referrals).
+      allow update: if isOwner(userId) || isAdmin() || 
+                      (isSignedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['referralCount']));
+      
+      allow delete: if isAdmin();
+    }
+
+    match /transactions/{transactionId} {
+      // Users can list/read their own transactions
+      allow list: if isSignedIn() && (isAdmin() || request.query.limit <= 100);
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Users can create their own transactions
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      
+      // Only admins can update/delete
+      allow update, delete: if isAdmin();
+    }
+
+    match /investments/{investmentId} {
+      // Users can list/read their own investments
+      allow list: if isSignedIn() && (isAdmin() || request.query.limit <= 100);
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Users can create their own investments
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      
+      // Only admins can update/delete
+      allow update, delete: if isAdmin();
+    }
+  }
+}
+
+    

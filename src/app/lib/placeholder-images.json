@@ -1,0 +1,17 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Professional financial investment background",
+      "imageUrl": "https://picsum.photos/seed/flexinvest1/1200/800",
+      "imageHint": "finance investment"
+    },
+    {
+      "id": "avatar-user",
+      "description": "User profile avatar",
+      "imageUrl": "https://picsum.photos/seed/user123/200/200",
+      "imageHint": "portrait person"
+    }
+  ]
+}
